@@ -1,4 +1,4 @@
-# Image Classification App
+# Image Vision
 
 This repository contains a simple web application that demonstrates how to use <a href = "https://github.com/Suei43/imagevision">image vision </a>. The API allows users to classify images and receive predictions on their content.
 
