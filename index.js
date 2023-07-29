@@ -6,9 +6,10 @@ const imageRouter = require('./src/routes/imageRoute');
 
 app.use('/api', imageRouter);
 app.use('/uploads', express.static('uploads'));
+app.use(express.static('public'));
 
-app.get('/api',(req, res)=>{
-    res.send("Welcome to image classification API")
+app.get('/',(req, res)=>{
+    res.render("index")
 })
 
 app.listen(process.env.PORT || 3000, ()=>{
