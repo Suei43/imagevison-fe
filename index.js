@@ -1,22 +1,32 @@
-const express = require('express');
-const app = express();
-const hbs = require('hbs');
-require('dotenv').config()
+const form = document.getElementById('form');
+const image = document.getElementById('image');
+const result = document.getElementById('result');
 
-const imageRouter = require('./src/routes/imageRoute');
 
-app.set('view engine', 'hbs');
+    form.addEventListener('submit', (e) => {
+        const file = image.files[0];
+        if (!file) {
+            result.innerHTML = "Please select an image to upload.";
+            return;
+        }
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append('image', image.files[0]);
 
-app.use('/api', imageRouter);
-app.use('/uploads', express.static('uploads'));
-app.use(express.static('views'));
-
-app.get('/',(req, res)=>{
-    res.render("index.hbs")
-})
-
-app.listen(process.env.PORT || 3000, ()=>{
-    console.log(`Server is running on port ${process.env.PORT}.`)
-})
-
-module.exports = app;
+        fetch('https://image-vision-api.onrender.com', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            result.innerHTML = `
+                <div class="mt-4">
+                    <h2 class="text-xl font-bold mb-2">Result</h2>
+                    <p class="text-gray-800 text-sm">${data.result}</p>
+                </div>
+            `;
+        })
+        .catch(error => {
+            console.error(error);
+        })
+    })
