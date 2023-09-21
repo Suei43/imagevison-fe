@@ -1,56 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
     <title>Image Vision Demo</title>
-</head>
-<body class="bg-gray-100">
+  </head>
+  <body class="bg-gray-100">
     <div class="flex justify-center items-center h-screen">
-        <form class="bg-white p-8 rounded-lg shadow-lg" id="form">
-            <h1 class="text-2xl font-bold mb-4">Welcome to Image Vision 🚀</h1>
-            <label for="image" class="block mb-2 text-gray-800 text-sm"><em>Select an image and click submit: </em></label>
-            <input type="file" name="image" id="image" class="block w-full border rounded-lg py-2 px-3 mb-4 focus:outline-none focus:ring focus:border-blue-300">
-            <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 cursor-pointer" id="submitBtn">
-                Submit
-            </button>
-            <div id="result"></div>
-        </form>
-        <script src="./index.js"></script>
-</body>
+      <form class="bg-white p-8 rounded-lg shadow-lg" id="form">
+        <h1 class="text-2xl font-bold mb-4">Welcome to Image Vision 🚀</h1>
+        <label for="image" class="block mb-2 text-gray-800 text-xs"
+          ><em>Select an image and click submit: </em></label
+        >
+        <input
+          type="file"
+          name="image"
+          id="image"
+          class="block w-full border rounded-lg py-2 px-3 mb-4 focus:outline-none focus:ring focus:border-blue-300"
+        />
+        <button
+          type="submit"
+          class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 cursor-pointer"
+          id="submitBtn"
+        >
+          <span class="text-sm" id="btn-txt">Submit</span>
+        </button>
+        <div id="result"></div>
+      </form>
+    </div>
     <script>
-        const form = document.getElementById('form');
-const image = document.getElementById('image');
-const result = document.getElementById('result');
+      const form = document.getElementById("form");
+      const image = document.getElementById("image");
+      const result = document.getElementById("result");
+      const btnTxt = document.getElementById("btn-txt");
+      const submitBtn = document.getElementById("submitBtn");
+      let str = "Please Wait..";
+      const apiKey =
+        "623bee89bd6d44e595c648df2d7d207a007b93d80a0eff76b75e7515aa8f4d72"; //THIS APIKEY IS ONLY FOR TESTING PURPOSES
 
-
-    form.addEventListener('submit', (e) => {
+      form.addEventListener("submit", (e) => {
+        btnTxt.innerHTML = str;
+        let dotVisible = false;
+        function toggleDot() {
+          if (dotVisible) {
+            btnTxt.innerHTML = str;
+          } else {
+            btnTxt.innerHTML = str + ".";
+          }
+          dotVisible = !dotVisible;
+        }
+        setInterval(toggleDot, 1000);
+        submitBtn.setAttribute("disabled", "true");
+        submitBtn.classList.remove("hover:bg-blue-600", "cursor-pointer");
         const file = image.files[0];
         if (!file) {
-            result.innerHTML = "Please select an image to upload.";
-            return;
+          result.innerHTML = "Please select an image to upload.";
+          return;
         }
         e.preventDefault();
         const formData = new FormData();
-        formData.append('image', image.files[0]);
+        formData.append("image", image.files[0]);
+        console.log(formData);
 
-        fetch('https://image-vision-api.onrender.com', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
+        const headers = new Headers();
+        headers.append("x-api-key", apiKey);
+
+        fetch(
+          "https://image-vision-api.onrender.com/api/image-classification",
+          {
+            method: "POST",
+            headers: headers,
+            body: formData,
+          }
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
             result.innerHTML = `
                 <div class="mt-4">
-                    <h2 class="text-xl font-bold mb-2">Result</h2>
-                    <p class="text-gray-800 text-sm">${data.result}</p>
+                    <p class="text-gray-800 text-sm"><span class="font-semibold text-blue-500">Result:</span> ${data.classification[0].className}</p>
+                    <p class="text-gray-800 text-sm"><span class='font-semibold text-blue-500'>Probability:</span> ${data.classification[0].probability}</p>
                 </div>
             `;
-        })
-        .catch(error => {
+            btnTxt.innerHTML = "Submit";
+            submitBtn.setAttribute("disabled", "false");
+            submitBtn.classList.add("hover:bg-blue-600", "cursor-pointer");
+          })
+          .catch((error) => {
             console.error(error);
-        })
-    })
+            result.innerHTML = `
+                <div class="mt-4">
+                    <h5 class="text-base font-bold mb-2">An Error occured while processing image.</h5>
+                </div>
+            `;
+          });
+      });
     </script>
+  </body>
 </html>
